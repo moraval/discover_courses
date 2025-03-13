@@ -25,16 +25,15 @@ def load_course_data():
         
     return course_data
 
-# Function to load student preference data
-def load_student_preferences():
-    """Load student course preference data from Excel file"""
+def load_student_preferences(year='2022'):
     try:
-        # Try to load the student preference data
+        # Try to load the student preference data from the specific sheet
         preference_path = Path('data/student_data/student_course_preferences.xlsx')
-        preferences_df = pd.read_excel(preference_path)
+        preferences_df = pd.read_excel(preference_path, sheet_name=year)
+        print(f"Loaded preferences from sheet: {year}")
         return preferences_df
     except Exception as e:
-        print(f"Could not load student preferences: {e}")
+        print(f"Could not load student preferences from sheet '{year}': {e}")
         # Create dummy data for demonstration
         return None
 
@@ -96,9 +95,8 @@ def analyze_course_popularity(preferences_df, courses_df):
                 'pref_2': pref_counts[2],
                 'pref_3': pref_counts[3],
                 'pref_4': pref_counts[4],
-                'total_mentions': total_mentions,
                 'weighted_score': weighted_score,
-                'avg_pref': weighted_score / total_mentions if total_mentions > 0 else 0
+                'total_mentions': total_mentions,
             }
     
     # Convert to DataFrame for easier analysis
@@ -108,7 +106,7 @@ def analyze_course_popularity(preferences_df, courses_df):
     else:
         # Return empty DataFrame with expected columns
         return pd.DataFrame(columns=['course_id', 'name', 'pref_1', 'pref_2', 'pref_3', 'pref_4', 
-                                     'total_mentions', 'weighted_score', 'avg_pref'])
+                                     'weighted_score', 'total_mentions'])
 
 
 # Function to visualize popularity
@@ -118,7 +116,7 @@ def plot_course_popularity(popularity_df, metric='weighted_score', top_n=10):
     
     Parameters:
     - popularity_df: DataFrame from analyze_course_popularity containing course metrics
-    - metric: Column to plot ('weighted_score', 'total_mentions', 'avg_pref', etc.)
+    - metric: Column to plot ('weighted_score', 'total_mentions', etc.)
     - top_n: Number of top/bottom courses to display
     """
     if popularity_df.empty:
@@ -184,6 +182,6 @@ def save_popularity_data(popularity_df, year=None, output_dir=None):
     filepath = output_path / filename
     
     # Save to CSV
-    sorted_df.to_csv(filepath)
+    sorted_df.to_csv(filepath, index=False)
     print(f"Popularity data saved to {filepath}")
 
